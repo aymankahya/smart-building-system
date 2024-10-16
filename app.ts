@@ -13,6 +13,7 @@ import fs from "fs";
 import path from "path";
 import helmet from "helmet";
 import { weatherRouter } from "@/src/routes/weatherRouter";
+import rateLimit from "express-rate-limit";
 
 // Configure dotenv to use environement variables
 dotenv.config();
@@ -22,7 +23,6 @@ const PORT = process.env.PORT || 3000;
 const app = express();
 
 // Load SSL Certificate and Private for HTTPS server credentials
-
 const privateKey = fs.readFileSync(
   path.resolve(__dirname, "./keys/ssl/key.pem"),
   "utf-8"
@@ -33,6 +33,15 @@ const certificate = fs.readFileSync(
   "utf-8"
 );
 
+// Define rate limiting rule for all requests
+const rateLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // limit duration
+  max: 100, // Number of requets limited for each IP address
+  message: "Too many requests, please try again after 10 minutes",
+  standardHeaders: true, // set rate limiting header in the response sent
+});
+
+// Create the HTTPS server
 const server = createServer({ key: privateKey, cert: certificate }, app);
 
 app.use(logger(process.env.ENV === "dev" ? "dev" : "combined"));
@@ -41,6 +50,9 @@ app.use(express.urlencoded({ extended: false }));
 
 // Secure HTTPS server via Helmet (sets HTTP response headers to strengthen security)
 app.use(helmet());
+
+// Apply rate limiter to all routes and requests
+app.use(rateLimiter);
 
 // Initialize passport JWT strategy
 passport.use(strategy);
