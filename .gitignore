@@ -1,0 +1,8 @@
+# Dependency directories
+node_modules/
+
+# JWT and SSL keys
+keys/
+
+# dotenv environment variables file
+.env

@@ -1,7 +1,8 @@
 import { DataTypes } from "sequelize";
 import { sequelizeInstance } from "@/src/config/database";
+import { DoorInstance } from "@/src/types/Door";
 
-export const Door = sequelizeInstance.define(
+export const Door = sequelizeInstance.define<DoorInstance>(
   "Door",
   {
     id: {
